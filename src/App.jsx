@@ -3,83 +3,13 @@ import Header from "./components/header";
 import Stats from "./components/stats";
 import TaskCard from "./components/TaskCard";
 import Sidebar from "./components/sideBar";
+import useTasks from "./hooks/userTasks";
 
 function App() {
-  const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState("");
   const [category, setCategory] = useState("Work");
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Load tasks
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("tasks"));
-    if (saved) setTasks(saved);
-  }, []);
-
-  // Save tasks
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
-
-  // Add task
-  const addTask = () => {
-    if (!input.trim()) return;
-    const isDuplicate = tasks.some(
-      (t) => t.title.toLowerCase() === input.trim().toLowerCase()
-    );
-    if (isDuplicate) {
-      alert("A task with this title already exists!");
-      return;
-    }
-    const newTask = {
-      id: Date.now(),
-      title: input,
-      desc: "No description",
-      status: "pending",
-      category: category.trim(),
-      time: Date.now(),
-    };
-    setTasks((prev) => [newTask, ...prev]);
-    setInput("");
-  };
-
-  // Toggle task
-  const toggleTask = (id) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id
-          ? { ...t, status: t.status === "done" ? "pending" : "done" }
-          : t
-      )
-    );
-  };
-
-  // Delete task
-  const deleteTask = (id) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  // Edit task category
-  const editTask = (id, newCategory) => {
-    setTasks((prev) =>
-      prev.map((t) => t.id === id ? { ...t, category: newCategory } : t)
-    );
-  };
-
-  // Stats
-  const completed = tasks.filter((t) => t.status === "done").length;
-
-  // Chart data
-  const categoryData = useMemo(() => {
-    const data = { Work: 0, Personal: 0, Study: 0, Urgent: 0 };
-    tasks.forEach((task) => {
-      const cat = task.category?.trim();
-      if (data[cat] !== undefined) data[cat]++;
-    });
-    return data;
-  }, [tasks]);
-
-  // Filtered tasks for search
+  const { tasks, completed, categoryData, addTask, toggleTask, deleteTask, editTask } = useTasks();
   const filteredTasks = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return tasks;
@@ -90,7 +20,6 @@ function App() {
         t.desc.toLowerCase().includes(q)
     );
   }, [tasks, searchQuery]);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-200 via-white to-gray-100 p-6">
       <Header onSearch={setSearchQuery} searchQuery={searchQuery} />

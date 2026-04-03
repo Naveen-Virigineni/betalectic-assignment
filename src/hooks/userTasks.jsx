@@ -1,27 +1,88 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from "react";
 
-export const useTasks = () => {
-  // Initialized with zero tasks
+function useTasks() {
   const [tasks, setTasks] = useState([]);
 
-  const addTask = (title) => {
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("tasks"));
+    if (saved) setTasks(saved);
+  }, []);
+
+  // Save to localStorage whenever tasks change
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
+
+  // Add task
+  const addTask = (input, category) => {
+    if (!input.trim()) return { error: "Task title cannot be empty!" };
+
+    // Duplicate check
+    const isDuplicate = tasks.some(
+      (t) => t.title.toLowerCase() === input.trim().toLowerCase()
+    );
+    if (isDuplicate) return { error: "A task with this title already exists!" };
+
     const newTask = {
       id: Date.now(),
-      title,
-      desc: 'No description provided.',
-      date: 'Added just now',
-      completed: false
+      title: input.trim(),
+      desc: "No description",
+      status: "pending",
+      category: category.trim(),
+      time: "Just now",
     };
-    setTasks([newTask, ...tasks]);
+
+    setTasks((prev) => [newTask, ...prev]);
+    return { error: null };
   };
 
+  // Toggle task status
   const toggleTask = (id) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, status: t.status === "done" ? "pending" : "done" }
+          : t
+      )
+    );
   };
 
+  // Delete task
   const deleteTask = (id) => {
-    setTasks(tasks.filter(t => t.id !== id));
+    setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
-  return { tasks, addTask, toggleTask, deleteTask };
-};
+  // Edit task category
+  const editTask = (id, newCategory) => {
+    setTasks((prev) =>
+      prev.map((t) => t.id === id ? { ...t, category: newCategory } : t)
+    );
+  };
+
+  // Category data for chart
+  const categoryData = useMemo(() => {
+    const data = { Work: 0, Personal: 0, Study: 0, Urgent: 0 };
+    tasks.forEach((task) => {
+      const cat = task.category?.trim();
+      if (data[cat] !== undefined) data[cat]++;
+    });
+    return data;
+  }, [tasks]);
+
+  const completed = tasks.filter((t) => t.status === "done").length;
+
+  
+
+  return {
+    tasks,
+    completed,
+    categoryData,
+    addTask,
+    toggleTask,
+    deleteTask,
+    editTask,
+  };
+}
+
+export default useTasks;
