@@ -30,7 +30,7 @@ function userTasks() {
       desc: "No description",
       status: "pending",
       category: category.trim(),
-      time: "Just now",
+      time: new Date().toISOString(),
     };
 
     setTasks((prev) => [newTask, ...prev]);
