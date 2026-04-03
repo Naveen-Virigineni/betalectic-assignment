@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 
-function useTasks() {
+function userTasks() {
   const [tasks, setTasks] = useState([]);
 
   // Load from localStorage on mount
@@ -85,4 +85,4 @@ function useTasks() {
   };
 }
 
-export default useTasks;
+export default userTasks;
