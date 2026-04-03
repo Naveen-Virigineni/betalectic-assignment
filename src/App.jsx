@@ -24,13 +24,20 @@ function App() {
   // Add task
   const addTask = () => {
     if (!input.trim()) return;
+    const isDuplicate = tasks.some(
+      (t) => t.title.toLowerCase() === input.trim().toLowerCase()
+    );
+    if (isDuplicate) {
+      alert("A task with this title already exists!");
+      return;
+    }
     const newTask = {
       id: Date.now(),
       title: input,
       desc: "No description",
       status: "pending",
       category: category.trim(),
-      time: "Just now",
+      time: Date.now(),
     };
     setTasks((prev) => [newTask, ...prev]);
     setInput("");
@@ -115,14 +122,8 @@ function App() {
               <option value="Study">Study</option>
               <option value="Urgent">Urgent</option>
             </select>
-            <button
-              onClick={addTask}
-              className="bg-white px-5 py-3 rounded-xl shadow-md"
-            >
-              + Add Task
-            </button>
-            <button className="bg-teal-600 text-white px-5 py-3 rounded-xl shadow-md">
-              Start Pomodoro
+            <button onClick={addTask} className="bg-teal-600 text-white px-5 py-3 rounded-xl shadow-md">
+              Add task
             </button>
           </div>
 

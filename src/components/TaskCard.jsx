@@ -36,7 +36,7 @@ function TaskCard({ task, toggleTask, deleteTask, editTask }) {
         </button>
       </div>
 
-      <p className="text-sm text-gray-400 mb-2">{task.time}</p>
+      <p className="text-sm text-gray-400 mb-2">{new Date(task.time).toLocaleString()}</p>
 
       <h2
         className={`font-semibold text-lg mb-1 ${
